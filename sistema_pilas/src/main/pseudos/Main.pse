@@ -1,0 +1,129 @@
+Algoritmo Main
+   Cadena expresion
+   Cadena expresionPrefija
+   Cadena expresionPostfija
+
+   Función LimpiarPantalla()
+   LimpiarPantalla
+   Fin Función
+
+   Procedimiento Principal()
+      Entero front <- -1
+      Entero rear <- -1
+      Escáner sc <- Nueva Instancia de Escáner(System.in)
+      Booleano salir <- Falso
+
+      Mientras No salir Hacer
+         LimpiarPantalla()
+         Escribir("====================================")
+         Escribir("Sistema de expresiones (PILAS)")
+         Escribir("Selecciona una opción:")
+         Escribir("1. Ingresar expresión infija")
+         Escribir("2. Convertir expresión infija a postfija")
+         Escribir("3. Convertir expresión infija a prefija")
+         Escribir("4. Evaluar expresiones")
+         Escribir("5. Salir")
+         Escribir("Ingresa una opción: ")
+         Entero opcion <- ConvertirAEntero(sc.leerLinea())
+
+         Según opcion Hacer
+            Caso 1:
+               LimpiarPantalla()
+               Escribir("Ingresar la expresión para ser validada:")
+               Escribir("Ingresa la expresión infija:")
+               expresion <- sc.leerLinea()
+               expresionPostfija <- Nulo
+               expresionPrefija <- Nulo
+               Escribir("La expresión es: " + expresion)
+               Escribir("¿Es válida? " + ExpressionConverter.validateInfixExpression(expresion))
+               Escribir("Expresión guardada en memoria")
+               Escribir("Enter para continuar...")
+               sc.leerLinea()
+            Fin Caso
+            Caso 2:
+               LimpiarPantalla()
+               Si expresion == Nulo Entonces
+                  Escribir("No hay expresión guardada en memoria. Por favor ingresa la expresión infija primero.")
+                  Escribir("Enter para continuar...")
+                  sc.leerLinea()
+                  Romper
+               Fin Si
+               Si expresionPostfija != Nulo Entonces
+                  Escribir("Ya hay una expresión postfija guardada en memoria.")
+                  Romper
+               Fin Si
+               Escribir("Convertir expresión infija a postfija")
+               Escribir("La expresión es: " + expresion)
+               expresionPostfija <- ExpressionConverter.infixToPostfix(expresion)
+               Escribir("La expresión postfija es: " + expresionPostfija)
+               Escribir("Enter para continuar...")
+               sc.leerLinea()
+            Fin Caso
+            Caso 3:
+               LimpiarPantalla()
+               Si expresion == Nulo Entonces
+                  Escribir("No hay expresión guardada en memoria. Por favor ingresa la expresión infija primero.")
+                  Escribir("Enter para continuar...")
+                  sc.leerLinea()
+                  Romper
+               Fin Si
+               Si expresionPrefija != Nulo Entonces
+                  Escribir("Ya hay una expresión prefija guardada en memoria.")
+                  Romper
+               Fin Si
+               Escribir("Convertir expresión infija a prefija")
+               Escribir("La expresión es: " + expresion)
+               expresionPrefija <- ExpressionConverter.infixToPrefix(expresion)
+               Escribir("La expresión prefija es: " + expresionPrefija)
+               Escribir("Enter para continuar...")
+               sc.leerLinea()
+            Fin Caso
+            Caso 4:
+               Lista de Decimal values <- Nueva Lista de Decimal
+               Lista de Carácter operadores <- Nueva Lista de Carácter
+
+               LimpiarPantalla()
+               Escribir("Evaluar expresiones infija, prefija y postfija")
+               Escribir("Expresión: " + expresion)
+
+               Si expresion == Nulo Entonces
+                  Escribir("No hay expresión guardada en memoria. Por favor ingresa la expresión infija primero.")
+                  Escribir("Enter para continuar...")
+                  Leer y Descartar Línea de Entrada del Usuario
+                  Romper
+               Fin Si
+
+               Si expresionPrefija == Nulo Entonces
+                  Escribir("No hay expresión prefija guardada en memoria. Por favor convierte la expresión infija a prefija primero.")
+                  Escribir("Enter para continuar...")
+                  Leer y Descartar Línea de Entrada del Usuario
+                  Romper
+               Fin Si
+
+               Si expresionPostfija == Nulo Entonces
+                  Escribir("No hay expresión postfija guardada en memoria. Por favor convierte la expresión infija a postfija primero.")
+                  Escribir("Enter para continuar...")
+                  Leer y Descartar Línea de Entrada del Usuario
+                  Romper
+               Fin Si
+
+               Escribir("\nLa expresión postfija es: " + expresionPostfija)
+               Escribir("El resultado es: " + ExpressionConverter.evaluatePostfixExpression(expresionPostfija, values, operadores))
+               Escribir("La expresión prefija es: " + expresionPrefija)
+               Escribir("El resultado es: " + ExpressionConverter.evaluatePrefixExpression(expresionPrefija, values, operadores))
+               Escribir("La expresión infija es: " + expresion)
+               Escribir("El resultado es: " + ExpressionConverter.evaluateInfixExpression(expresion, values, operadores))
+
+               Escribir("\nEnter para continuar...")
+               Leer y Descartar Línea de Entrada del Usuario
+               Romper
+            Fin Caso
+            De Otro Modo:
+               Escribir("Saliendo...")
+               salir <- Verdadero
+               Romper
+            Fin De Otro Modo
+         Fin Según
+      Fin Mientras
+   Fin Procedimiento
+Fin Algoritmo

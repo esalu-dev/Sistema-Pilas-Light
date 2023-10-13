@@ -1,0 +1,376 @@
+Algoritmo ExpressionConverter
+   Constante CLOSING_PARENTHESIS = ')'
+   Constante OPENING_PARENTHESIS = '('
+
+   Función EsOperador(carácter c) -> Booleano
+      Si c es igual a '+' o c es igual a '-' o c es igual a '*' o c es igual a '/' o c es igual a '^' Entonces
+         Devolver Verdadero
+      Sino
+         Devolver Falso
+      Fin Si
+   Fin Función
+
+   Función EsOperando(carácter c) -> Booleano
+      Si (c >= 'a' y c <= 'z') o (c >= 'A' y c <= 'Z') Entonces
+         Devolver Verdadero
+      Sino
+         Devolver Falso
+      Fin Si
+   Fin Función
+
+   Función MostrarError(expresión, contador) -> Cadena
+      cadena sb <- Nueva Cadena
+      sb.Agregar(expresión)
+      sb.Agregar("\n")
+      Para i de 0 hasta contador Hacer
+         sb.Agregar(" ")
+      Fin Para
+      sb.Agregar("^")
+      Devolver sb.ComoCadena()
+   Fin Función
+
+   Función ObtenerPrioridad(operador) -> Entero
+      Según operador Hacer
+         Caso '+':
+         Caso '-':
+               Devolver 1
+         Caso '*':
+         Caso '/':
+               Devolver 2
+         Caso '^':
+               Devolver 3
+         De Otro Modo:
+               Devolver 0
+      Fin Según
+   Fin Función
+
+   Funcion ValidarExpresionInfija(expresión) -> Booleano
+      Booleano resultado <- Falso
+      Entero balanceOperandAndOperator <- 0
+      Entero numberParenthesis <- 0
+      Entero contador <- 0
+      Booleano lastIsOperator <- Falso
+      Entero longitud <- Longitud(expresión) - 1
+
+      Para cada carácter c en expresión Hacer
+         Si c es igual a CARACTER_APERTURA_PARENTESIS Entonces
+               Incrementar numberParenthesis en 1
+               lastIsOperator <- Falso
+         Fin Si
+
+         Si c es igual a CARACTER_CIERRE_PARENTESIS Entonces
+               Decrementar numberParenthesis en 1
+               Si NO lastIsOperator Entonces
+                  Lanzar Error con mensaje "Un paréntesis no puede preceder o suceder a un operador." + "\n" + MostrarError(expresión, contador)
+               Fin Si
+         Fin Si
+
+         Si EsOperando(c) Entonces
+               Incrementar balanceOperandAndOperator en 1
+               lastIsOperator <- Verdadero
+         Fin Si
+
+         Si EsOperador(c) Entonces
+               Decrementar balanceOperandAndOperator en 1
+               Si contador es igual a 0 Entonces
+                  Lanzar Error con mensaje "La expresión no puede comenzar con un operador." + "\n" + MostrarError(expresión, contador)
+               Fin Si
+               Si contador es igual a longitud Entonces
+                  Lanzar Error con mensaje "La expresión no puede terminar con un operador." + "\n" + MostrarError(expresión, contador)
+               Fin Si
+               Si NO lastIsOperator Entonces
+                  Lanzar Error con mensaje "Operador inesperado." + "\n" + MostrarError(expresión, contador)
+               Fin Si
+               lastIsOperator <- Falso
+         Fin Si
+
+         Si balanceOperandAndOperator > 1 Entonces
+               Lanzar Error con mensaje "Operando inesperado. Se esperaba un operador." + "\n" + MostrarError(expresión, contador)
+         Fin Si
+
+         Si balanceOperandAndOperator < 0 Entonces
+               Lanzar Error con mensaje "Operador inesperado. Se esperaba un operando en la posición." + "\n" + MostrarError(expresión, contador)
+         Fin Si
+
+         contador <- contador + 1
+      Fin Para
+
+      Si numberParenthesis > 0 Entonces
+         Lanzar Error con mensaje "Paréntesis '(' inesperado. Falta ')'."
+      Fin Si
+
+      Si numberParenthesis < 0 Entonces
+         Lanzar Error con mensaje "Paréntesis ')' inesperado. Falta '('."
+      Fin Si
+
+      Si balanceOperandAndOperator es igual a 1 Entonces
+         resultado <- Verdadero
+      Fin Si
+
+      Devolver resultado
+   Fin Funcion
+
+   Funcion Empujar(pila, elemento)
+      Si cima es igual a longitud de pila Entonces
+         Lanzar Error con mensaje "Desbordamiento de pila"
+      Fin Si
+      pila[cima] <- elemento
+      cima <- cima + 1
+   Fin Funcion
+
+   Funcion Sacar(pila)
+      Si cima es igual a 0 Entonces
+         Lanzar Error con mensaje "Subdesbordamiento de pila"
+      Fin Si
+      cima <- cima - 1
+      Devolver pila[cima]
+   Fin Funcion
+
+   Entero cima <- 0
+
+   Funcion InfixToPostfix(expresión) -> Cadena
+      Si NO ValidarExpresionInfija(expresión) Entonces
+         Lanzar Error con mensaje "Expresión inválida"
+      Fin Si
+      Cadena pila <- Nueva Cadena de longitud de expresión
+      Cadena postfija <- ""
+      Para cada carácter c en expresión Hacer
+         Si EsOperando(c) Entonces
+               postfija <- postfija + c
+         Fin Si
+         Si EsOperador(c) Entonces
+               Mientras cima > 0 y ObtenerPrioridad(pila[cima-1]) >= ObtenerPrioridad(c) Hacer
+                  postfija <- postfija + Sacar(pila)
+               Fin Mientras
+               Empujar(pila, ConvertirACadena(c))
+         Fin Si
+         Si c es igual a CARACTER_APERTURA_PARENTESIS Entonces
+               Empujar(pila, ConvertirACadena(c))
+         Fin Si
+         Si c es igual a CARACTER_CIERRE_PARENTESIS Entonces
+               Mientras cima > 0 y pila[cima-1] no es igual a CARACTER_APERTURA_PARENTESIS Hacer
+                  postfija <- postfija + Sacar(pila)
+               Fin Mientras
+               Sacar(pila)
+         Fin Si
+      Fin Para
+      Mientras cima > 0 Hacer
+         postfija <- postfija + Sacar(pila)
+      Fin Mientras
+      Devolver postfija
+   Fin Funcion
+
+   Funcion InfixToPrefix(expresión) -> Cadena
+      Si NO ValidarExpresiónInfija(expresión) Entonces
+         Lanzar Error con mensaje "Expresión inválida"
+      Fin Si
+      Cadena infijaRevertida <- Nueva Cadena a partir de la inversión de expresión
+      Para i desde 0 hasta longitud de infijaRevertida Hacer
+         Si infijaRevertida[i] es igual a '(' Entonces
+               infijaRevertida[i] <- ')'
+         Sino Si infijaRevertida[i] es igual a ')' Entonces
+               infijaRevertida[i] <- '('
+         Fin Si
+      Fin Para
+      Cadena postfija <- InfixToPostfix(infijaRevertida)
+      Cadena prefija <- Nueva Cadena a partir de la inversión de postfija
+      Devolver prefija
+   Fin Funcion
+
+   Entero cima2 <- 0
+
+   Funcion Empujar(pila, elemento)
+      Si cima2 es igual a longitud de pila Entonces
+         Lanzar Error con mensaje "Desbordamiento de pila"
+      Fin Si
+      pila[cima2] <- elemento
+      cima2 <- cima2 + 1
+   Fin Función
+
+   Función Sacar(pila)
+      Si cima2 es igual a 0 Entonces
+         Lanzar Error con mensaje "Subdesbordamiento de pila"
+      Fin Si
+      cima2 <- cima2 - 1
+      Devolver pila[cima2]
+   Fin Funcion
+
+   Funcion EvaluarExpresiónPostfija(expresión, valores, operandos) -> Real
+      Arreglo de reales pilaOperandos <- Nuevo Arreglo de Reales con longitud igual a la longitud de expresión
+      Entero cima <- 0
+
+      Para cada carácter c en expresión Hacer
+         Si c es una letra Entonces
+               Si operandos contiene c Entonces
+                  Entero índiceOperando <- Obtener el índice de c en operandos
+                  Real valorOperando <- Obtener el valor correspondiente en valores con índice índiceOperando
+                  Empujar(pilaOperandos, valorOperando)
+               Sino
+                  Agregar c a operandos
+                  Real valor <- SolicitarValorVariable(c)
+                  Agregar valor a valores
+                  Empujar(pilaOperandos, valor)
+               Fin Si
+         Sino Si c es un dígito o un punto decimal Entonces
+               Cadena operando <- Nueva Cadena vacía
+               Mientras c es un dígito o un punto decimal Hacer
+                  Concatenar c a operando
+                  Incrementar índice en 1
+                  Si índice es igual a la longitud de expresión Entonces
+                     Romper
+                  Fin Si
+                  Asignar el carácter siguiente de expresión a c
+               Fin Mientras
+               Real valorOperando <- Convertir operando a Real
+               Empujar(pilaOperandos, valorOperando)
+               Decrementar índice en 1
+         Sino Si c es un operador Entonces
+               Real operando2 <- Sacar(pilaOperandos)
+               Real operando1 <- Sacar(pilaOperandos)
+               Real resultado <- RealizarOperación(c, operando1, operando2)
+               Empujar(pilaOperandos, resultado)
+         Sino Si c es un espacio en blanco Entonces
+               // Ignorar espacios en blanco
+         Sino
+               Lanzar Excepción con mensaje "Carácter no válido: " + c
+         Fin Si
+      Fin Para
+
+      Si cima es igual a 1 Entonces
+         Devolver Sacar(pilaOperandos)
+      Sino
+         Lanzar Excepción con mensaje "Expresión inválida"
+      Fin Si
+   Fin Funcion
+
+   Funcion SolicitarValorVariable(variable) 
+      Mostrar "Ingrese el valor para la variable " + variable + ": "
+      Mientras que no se ingrese un valor válido (número) Hacer
+         Mostrar "Valor no válido. Ingrese un número: "
+      Fin Mientras
+      Devolver el valor ingresado como número Real
+   Fin Funcion
+
+   Funcion EvaluarExpresiónPrefija(expresión, valores, operandos) -> Real
+      Arreglo de reales pila <- Nuevo Arreglo de Reales con longitud igual a la longitud de expresión
+      Entero índice <- longitud de expresión - 1
+
+      Mientras índice sea mayor o igual a 0 Hacer
+         Carácter carácterActual <- Obtener el carácter en expresión en la posición índice
+
+         Si carácterActual es una letra Entonces
+               Si operandos contiene carácterActual Entonces
+                  Entero índiceOperando <- Obtener el índice de carácterActual en operandos
+                  Real valorOperando <- Obtener el valor correspondiente en valores con índice índiceOperando
+                  Empujar(pila, valorOperando)
+               Sino
+                  Agregar carácterActual a operandos
+                  Real valor <- SolicitarValorVariable(carácterActual)
+                  Agregar valor a valores
+                  Empujar(pila, valor)
+               Fin Si
+               Decrementar índice en 1
+         Sino Si carácterActual es un operador Entonces
+               Real operando2 <- Sacar(pila)
+               Real operando1 <- Sacar(pila)
+               Real resultado <- RealizarOperación(carácterActual, operando1, operando2)
+               Empujar(pila, resultado)
+               Decrementar índice en 1
+         Sino Si carácterActual es un espacio en blanco Entonces
+               // Ignorar espacios en blanco
+               Decrementar índice en 1
+         Sino
+               Lanzar Excepción con mensaje "Carácter no válido: " + carácterActual
+         Fin Si
+      Fin Mientras
+
+      Devolver Sacar(pila)
+   Fin Funcion
+
+   Funcion SolicitarValorVariable(variable) 
+      Mostrar "Ingrese el valor para la variable " + variable + ": "
+      Mientras que no se ingrese un valor válido (número) Hacer
+         Mostrar "Valor no válido. Ingrese un número: "
+      Fin Mientras
+      Devolver el valor ingresado como número Real
+   Fin Funcion
+
+   Funcion RealizarOperación(operador, operando1, operando2) 
+      Según operador Hacer
+         Caso '+':
+               Devolver operando1 + operando2
+         Caso '-':
+               Devolver operando1 - operando2
+         Caso '*':
+               Devolver operando1 * operando2
+         Caso '/':
+               Si operando2 es igual a 0 Entonces
+                  Lanzar Excepción con mensaje "División por cero"
+               Fin Si
+               Devolver operando1 / operando2
+         Caso '^':
+               Devolver Potencia(operando1, operando2)
+         Por Defecto:
+               Lanzar Excepción con mensaje "Operador no válido: " + operador
+      Fin Según
+   Fin Funcion
+
+   Función EvaluarExpresiónInfija(expresión, valores, operandos) -> Real
+      Cadena expresiónInfija <- ""
+      
+      Para cada carácter carácterActual en expresión Hacer
+         Si carácterActual es un operando Entonces
+               Entero índiceOperando <- Obtener el índice de carácterActual en operandos
+               Real valorOperando <- Obtener el valor correspondiente en valores con índice índiceOperando
+               Cadena valor <- Convertir valorOperando a Cadena
+               expresiónInfija <- expresiónInfija + valor
+         Sino
+               Si carácterActual es '^' Entonces
+                  // Evaluar la expresión como notación postfija
+                  Real resultado <- EvaluarExpresiónPostfija(ObtenerExpresiónPostfija(expresión), valores, operandos)
+                  Devolver resultado
+               Fin Si
+               expresiónInfija <- expresiónInfija + carácterActual
+         Fin Si
+      Fin Para
+
+      // Usar un motor de scripting para evaluar la expresión
+      MotorScript manager <- Nuevo MotorScript()
+      MotorScript engine <- ObtenerMotorPorNombre("js", manager)
+
+      Objeto resultado <- Nulo
+      Intentar
+         resultado <- EvaluarExpresiónUtilizandoMotor(expresiónInfija, engine)
+      Capturar ExcepciónScript
+         Imprimir Error de Script
+      Fin Intentar
+
+      // Convertir el resultado a un valor real
+      Si resultado es un número Entonces
+         Devolver ConvertirResultadoANúmeroReal(resultado)
+      Sino
+         Lanzar Excepción con mensaje "La expresión no se pudo evaluar a un valor numérico."
+      Fin Si
+   Fin Función
+
+   Cadena ObtenerExpresiónPostfija(expresión)
+      // Implementar la conversión de expresión infija a postfija aquí
+      // Puedes llamar a la función existente "infixToPostfix" si es adecuado
+   Fin Función
+
+   Real EvaluarExpresiónPostfija(expresiónPostfija, valores, operandos)
+      // Implementar la evaluación de la expresión postfija aquí
+      // Puedes llamar a la función existente "evaluatePostfixExpression" si es adecuado
+   Fin Función
+
+   Objeto EvaluarExpresiónUtilizandoMotor(expresión, motor)
+      // Evaluar la expresión utilizando el motor de scripting proporcionado
+      Resultado <- EvaluarExpresiónConMotor(expresión, motor)
+      Devolver Resultado
+   Fin Función
+
+   Funcion ConvertirResultadoANúmeroReal(resultado)
+      // Convertir el resultado en un número real
+      Devolver ConvertirResultadoANúmeroReal(resultado)
+   Fin Funcion
+Fin Algoritmo
